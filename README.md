@@ -47,9 +47,9 @@ wappacvez -u <url> [-cvss value] [-lg value] [-oHTML value.html] [-oCSV value.cs
 ```
 
 * `-u`: URL to scan (mandatory)
-* `-cvss`: Filter vulnerabilities by CVSS [critical,high,medium,low,none] (default:all)
-* `-lg`: Set language of information [en,es] (default:en)
-* `-oHTML`: Save CVEs list in HTML file [filename] (default:report.html)
+* `-cvss`: Filter vulnerabilities by CVSS [critical,high,medium,low,none] (default: all)
+* `-lg`: Set language of information [en,es] (default: en)
+* `-oHTML`: Save CVEs list in HTML file [filename] (default: report.html)
 * `-oCSV`: Save CVEs list in CSV file [filename]
 
 | The only mandatory argument is the url
