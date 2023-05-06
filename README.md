@@ -73,6 +73,7 @@ Wappacvez will proceed to install Docker and build my Wappalyzer image and insta
 </div>
 
 [Wappalyzer](https://github.com/wappalyzer/wappalyzer)
+
 [uCVE](https://github.com/m3n0sd0n4ld/uCVE)
 
 
