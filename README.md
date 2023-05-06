@@ -2,8 +2,9 @@
   <h1>Wappacvez</h1>
 </div>
 <div align="center">
-  <img src="" align="center">
+  <img src="https://user-images.githubusercontent.com/67438760/236649071-9bc6c030-7ff0-40c9-8dfd-e4e096f0b30a.png" align="center">
 </div>
+
 
 Wappacvez is a command-line tool that analyzes a web application by using a dockerized Wappalyzer. It then extracts the software for which a version is detected, and finally employs the uCVE tool to search for associated CVEs. The output can be exported in HTML or CSV format, depending on the user's preference.
 
