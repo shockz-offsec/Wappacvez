@@ -62,6 +62,12 @@ wappacvez -u <url> [-cvss value] [-lg value] [-oHTML value.html] [-oCSV value.cs
 wappacvez -u "https://www.nasa.gov" -oHTML "nasa.html" -cvss critical,high
 ```
 
+Output
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/67438760/236649945-fc9ab712-489f-47fb-89d7-f4cd8b8c705f.png" align="center">
+</div>
+
 <div align="center">
   <h2>Details</h2>
 </div>
