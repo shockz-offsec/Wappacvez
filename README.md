@@ -14,6 +14,7 @@ Wappacvez is a command-line tool that analyzes a web application by using a dock
 
 * Linux or Mac
 * Go (version 1.16+)
+* Docker
 
 <div align="center">
   <h2>Installation</h2>
