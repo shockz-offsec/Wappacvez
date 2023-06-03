@@ -23,7 +23,7 @@ Wappacvez is a command-line tool that analyzes a web application by using a dock
 To install Wappacvez, run the following command:
 
 ```
-go get github.com/shockz-offsec/wappacvez
+go install -v github.com/shockz-offsec/wappacvez@latest
 ```
 or via building via repository
 ```
