@@ -3,12 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"encoding/json"
     "strings"
 	"os/exec"
-	"runtime"
 	"net/url"
 	"regexp"
 )
@@ -23,21 +21,13 @@ const (
 )
 
 func flow(urlFlag string, args string) {
-	// Si no se ha especificado, comprobamos si está instalado Docker
 	dockerInstalled := checkDockerInstalled()
 	if !dockerInstalled {
-		// Si no está instalado, intentamos instalarlo
-		if runtime.GOOS == "linux" {
-			installDockerForLinux()
-		} else if runtime.GOOS == "windows" {
-			fmt.Println(red + "[!] " + reset + "Cannot run on Windows")
-			os.Exit(1)
-		}
+		fmt.Println(red + "[!] Docker is not installed" + reset )
 	}
 
 	uCVE_path, err := verify_install_uCVE()
 	if err != nil {
-		// Manejar el error aquí
 		fmt.Println(red + "[!] " + reset + "Error: ", err)
 		return
 	}
@@ -50,8 +40,7 @@ func flow(urlFlag string, args string) {
 
 	fmt.Printf(yellow + "[+] " + reset + "Running wappalyzer...\n")
 
-	// Ejecutamos el comando wappalyzer con la URL como argumento
-	out, err := exec.Command("docker", "run", "--rm", "wappalyzer", urlFlag).Output()
+	out, err := exec.Command("docker", "run", "--rm", "shockzoffsec/wappalyzer", urlFlag).Output()
 	if err != nil {
 		errMsg := fmt.Sprintf("%s[!] %sError: %v%s", red, reset, err, reset)
 		panic(errMsg)
@@ -81,7 +70,7 @@ func flow(urlFlag string, args string) {
 }
 
 func parseTechnologiesJSON(jsonBytes []byte) (map[string]string, error) {
-    // Parseamos el JSON obtenido
+
     var data map[string]interface{}
     if err := json.Unmarshal(jsonBytes, &data); err != nil {
         return nil, err
@@ -113,7 +102,6 @@ func parseTechnologiesJSON(jsonBytes []byte) (map[string]string, error) {
 }
 
 func writeVersionsToJSONFile(versions map[string]string, filename string) error {
-    // Creamos y escribimos el JSON final en el archivo temporal
     outputFile, err := os.Create(filename)
     if err != nil {
         return err
@@ -134,7 +122,6 @@ func writeVersionsToJSONFile(versions map[string]string, filename string) error 
 
 
 func uCVE(uCVE_path string, args string, filename string) {
-	//Ejecutamos el comando uCVE con los argumentos necesarios
 	uCVEArgs := []string{"-iJSON", "technologies.json"}
     if args != "" {
         uCVEArgs = append(uCVEArgs, strings.Split(args, " ")...)
@@ -150,7 +137,6 @@ func uCVE(uCVE_path string, args string, filename string) {
 	}
 }
 
-// Función que comprueba si Docker está instalado
 func checkDockerInstalled() bool {
 	cmd := exec.Command("docker", "version")
 	err := cmd.Run()
@@ -161,21 +147,18 @@ func checkDockerInstalled() bool {
 }
 
 func checkDockerImage() error {
-    // Se ejecuta el comando "docker images" para obtener la lista de imágenes disponibles
     cmd := exec.Command("docker", "images")
     out, err := cmd.Output()
     if err != nil {
         return fmt.Errorf(red + "[!] " + reset + "Error when executing the command 'docker images'.: %v", err)
     }
 
-    // Se busca si existe una imagen llamada "wappalyzer"
     if !strings.Contains(string(out), "wappalyzer") {
-		fmt.Println(yellow + "[+] " + reset + "Image 'wappalyzer' not found. Building...")
-        // Si la imagen no existe, se construye
-        cmd := exec.Command("docker", "build", "-t", "wappalyzer", ".", "--no-cache")
+		fmt.Println(yellow + "[+] " + reset + "Image 'shockzoffsec/wappalyzer' not found. Building...")
+        cmd := exec.Command("docker", "pull", "shockzoffsec/wappalyzer:latest")
         err := cmd.Run()
         if err != nil {
-            return fmt.Errorf(red + "[!] " + reset + "Error building the image 'wappalyzer'.: %v", err)
+            return fmt.Errorf(red + "[!] " + reset + "Error pulling the image 'wappalyzer'.: %v", err)
         }
         fmt.Println(green + "[+] " + reset + "wappalyzer' image built successfully")
     } else {
@@ -186,47 +169,27 @@ func checkDockerImage() error {
 }
 
 func verify_install_uCVE() (string, error) {
-	// Definimos la herramienta que queremos buscar
 	tool := "uCVE"
 
-	// Buscamos la ruta de la herramienta
 	path, err := exec.LookPath(tool)
 	if err != nil {
 		fmt.Printf(yellow + "[+] " + reset + "The tool %s is not installed. Installing...\n", tool)
-
-		// Instalamos la herramienta utilizando el comando "go get"
-		cmd := exec.Command("go", "get", "github.com/m3n0sd0n4ld/uCVE")
+		cmd := exec.Command("go", "install", "github.com/m3n0sd0n4ld/uCVE@latest")
 		if err := cmd.Run(); err != nil {
 			fmt.Printf(red + "[!]" + reset + "Error: Could not install the tool %s.\n", tool)
 			return "", err
 		}
-
-		// Volvemos a buscar la ruta de la herramienta
 		path, err = exec.LookPath(tool)
 		if err != nil {
 			fmt.Printf(red + "[!] " + reset + "Error: Tool %s was not found after installation.\n", tool)
 			return "", err
 		}
-
 		fmt.Printf(green + "[+] " + reset + "The %s tool was successfully installed on: %s\n", tool, path)
 	} else {
 		fmt.Printf(green + "[+] " + reset + "The tool %s is already installed in: %s\n", tool, path)
 	}
-
-	// Devolvemos la ruta de la herramienta
 	return path, nil
 }
-
-
-// Función que instala Docker para Linux
-func installDockerForLinux() {
-	cmd := exec.Command("sh", "-c", "curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh")
-	err := cmd.Run()
-	if err != nil {
-		log.Fatalf(red + "[!] " + reset + "Error installing Docker: %s", err)
-	}
-}
-
 
 func validateFlags(cvss string, language string, htmlFile string, csvFile string) bool {
     validCVSS := false
@@ -295,7 +258,6 @@ func main() {
     htmlFileFlag := flag.String("oHTML", "", "Save CVEs list in HTML file [filename]")
     csvFileFlag := flag.String("oCSV", "", "Save CVEs list in CSV file [filename]")
 
-    // Definimos la descripción del uso del programa
     flag.Usage = func() {
         fmt.Fprintf(os.Stderr, "Usage:\n")
         fmt.Fprintf(os.Stderr, "\twappacvez -u [URL] [OPTIONS]\n\n")
@@ -305,26 +267,21 @@ func main() {
         fmt.Fprintf(os.Stderr, "\twappacvez -u \"https://www.nasa.gov\" -oHTML \"nasa.html\" -cvss critical,high\n\n")
     }
 
-    // Parseamos los flags
     flag.Parse()
 
-    // Si se especifica -h o no se especifica URL, mostramos el uso del programa
     if flag.NFlag() == 0 || *urlFlag == "" {
         flag.Usage()
         os.Exit(0)
     }
 
-    // Comprobamos si la URL es válida
     if _, err := url.ParseRequestURI(*urlFlag); err != nil {
         fmt.Println(red + "[!] Invalid URL\n" + reset )
         flag.Usage()
         os.Exit(1)
     }
 
-    // Validamos los argumentos
     validateFlags(*cvssFlag, *languageFlag, *htmlFileFlag, *csvFileFlag)
 
-    // Concatenamos los argumentos válidos
     args := ""
     if *cvssFlag != "" {
         args += fmt.Sprintf("-cvss %s ", *cvssFlag)
