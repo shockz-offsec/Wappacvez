@@ -1,4 +1,8 @@
 <div align="center">
+  <h1>NO LONGER MAINTAINED</h1>
+  <h2>Wappalyzer official has gone private</h2>
+</div>
+<div align="center">
   <h1>Wappacvez</h1>
 </div>
 <div align="center">
